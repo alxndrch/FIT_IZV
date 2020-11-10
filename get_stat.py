@@ -4,9 +4,9 @@
 # author: Alexandr Chalupnik
 # email: <xchalu15@stud.fit.vutbr.cz>
 
-from re import sub
 import matplotlib.pyplot as plt
 import numpy as np
+import os 
 
 def plot_stat(data_source, fig_location=None, show_figure=False):
     """
@@ -36,7 +36,7 @@ def plot_stat(data_source, fig_location=None, show_figure=False):
     window_title = "Statistika dopravních nehod Policie ČR"
 
     for region in ax_x.keys():
-        ax_y.append(np.nonzero(data[-1] == region)[0][0])  # ax_y.append(np.nonzero(data[-1] == region)[0][-1] - ax_y[-1])
+        ax_y.append(np.nonzero(data[-1] == region)[0][0])
     ax_y.append(ax_y[-1]+len(data[-1]))
 
     for i, k in enumerate(ax_x.keys()):
@@ -55,13 +55,33 @@ def plot_stat(data_source, fig_location=None, show_figure=False):
     if show_figure:
         plt.show()
     if fig_location is not None:
+        if not os.path.exists(os.path.dirname(fig_location)):
+            os.makedirs(os.path.dirname(fig_location))
+            
         plt.savefig(fig_location)
 
 
 def set_subplot(subplt, year, x, y):
+    """
+    zajisti vykresleni podgrafu
+    
+    Parameters
+    ----------
+    subplt : pyplot.axes
+        podgraf
+    year : str
+        rok
+    x : list
+        zkartky vypisovanych kraju
+    y : list
+        pocet dopravnich nehod pro kazdy kraj v roce year
+    """
+    
     subplt.set_title(f"Rok {year}")
     subplt.set_ylabel("Počet dopravních nehod")
     subplt.set_xlabel("Kraje")
+    subplt.grid(which="major", axis="y", color="gray", linewidth=0.15)
+    subplt.grid(b=False, which="major", axis="x")
     rects = subplt.bar(x,y)
     sorted_cols = sorted(y, reverse=True)
     for rect in rects:
@@ -70,13 +90,15 @@ def set_subplot(subplt, year, x, y):
                         xytext=(0, 0), 
                         xy=(rect.get_x() + rect.get_width() / 2.0, height), 
                         textcoords="offset points", 
-                        ha='center', va='bottom'
+                        ha='center', va='bottom',
+                        fontsize="large"
                         )
         
         subplt.annotate(f"{ height }", 
-                        xytext=(0, -10), 
+                        xytext=(0, -7), 
                         xy=(rect.get_x() + rect.get_width() / 2.0, height), 
                         textcoords="offset points", 
                         ha='center', va='center',
-                        color="white"
+                        color="white",
+                        fontsize="medium"
                         )

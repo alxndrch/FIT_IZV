@@ -33,7 +33,23 @@
         MSK: "07",
         JHM: "06", 
         ZLK: "15",
-        VYS: "16" 
+        VYS: "16"
+        
+    CSV hlavicka
+    "identifikační číslo", "druh pozemní komunikace", "číslo pozemní komunikace", 
+    "den, měsíc, rok", "týden", "čas", "druh nehody", "druh srážky jedoucích vozidel",
+    "druh pevné překážky", "charakter nehody", "zavinění nehody", "alkohol u viníka nehody přítomen",
+    "hlavní příčiny nehody", "usmrceno osob", "těžce zraněno osob", "lehce zraněno osob", 
+    "celková hmotná škoda", "druh povrchu vozovky", "stav povrchu vozovky v době nehody", 
+    "stav komunikace", "povětrnostní podmínky v době nehody", "viditelnost", "rozhledové poměry",
+    "dělení komunikace", "situování nehody na komunikaci", "řízení provozu v době nehody",
+    "místní úprava přednosti v jízdě", "specifická místa a objekty v místě nehody", 
+    "směrové poměry", "počet zúčastněných vozidel", "místo dopravní nehody", 
+    "druh křižující komunikace", "druh vozidla", "výrobní značka motorového vozidla", "rok výroby vozidla", 
+    "charakteristika vozidla", "smyk", "vozidlo po nehodě", "únik provozních, přepravovaných hmot",
+    "způsob vyproštění osob z vozidla", "směr jízdy nebo postavení vozidla", "škoda na vozidle",
+    "kategorie řidiče",  "stav řidiče", "vnější ovlivnění řidiče", "a", "b", "d", "e", "f", "g",
+    "h", "i", "j", "k", "l", "n", "o", "p", "q", "r", "s", "t", "lokalita nehody", "kraj"
 """
 
 import zipfile
@@ -55,34 +71,6 @@ from requests.models import MissingSchema
 
 from get_stat import plot_stat
 
-CSV_HEADER = [ "p1", "p36", "p37", "p2a", "weekday(p2a)", "p2b", "p6", "p7", 
-               "p8", "p9", "p10", "p11", "p12", "p13a", "p13b", "p13c", "p14",
-               "p15", "p16", "p17", "p18", "p19", "p20", "p21", "p22", "p23", 
-               "p24", "p27", "p28", "p34", "p35", "p39", "p44", "p45a", "p47",
-               "p48a", "p49", "p50a", "p50b", "p51", "p52", "p53", "p55a", 
-               "p57", "p58", "a", "b", "d", "e", "f", "g", "h", "i", "j", "k",
-               "l", "n", "o", "p", "q", "r", "s", "t", "p5a", "kraj" ]
-
-DATA_TYPES = [ "U12", "i8", "U8", "datetime64[D]", "i8", "i8", "i8", "i8", 
-               "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8",
-               "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", 
-               "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", 
-               "i8", "i8", "i8", "i8", "i8", "i8", "i8", "f8", "f8", "f8", 
-               "f8", "f8", "f8", "<U64", "<U64", "<U64", "<U64", "<U64", 
-               "<U64", "<U64", "<U64", "<U64", "i8", "i8", "<U64", "i8", "U3" 
-               ]
-
-class InvalidRegion(ValueError):
-    """Vyjimka pro neplatnou kod regionu"""
-    
-    def __init__(self, regions, msg):
-        self.regions = regions
-        self.msg = msg
-        super().__init__(regions)
-
-    def __str__(self):
-        return f"{self.msg}: {self.regions}"
-
 class DataDownloader():
     """
     Agregator statistik nehodovnosti Policie CR
@@ -91,7 +79,10 @@ class DataDownloader():
     ----------
     REGION_CODES : dict
         kod regionu : nazev csv souboru
-    
+    DATA_TYPES : list
+        datove typy pro kazdy sloupec csv 
+    CSV_HEADER : list
+        popis hlavicky csv
     Methods
     -------
     donwload_data()
@@ -109,6 +100,23 @@ class DataDownloader():
                     "KVK": "19", "ULK": "04","LBK": "18", "HKK": "05", 
                     "PAK": "17", "OLK": "14", "MSK": "07", "JHM": "06", 
                     "ZLK": "15", "VYS": "16" }
+
+    DATA_TYPES = [ "U12", "i8", "U8", "datetime64[D]", "i8", "i8", "i8", "i8", 
+               "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8",
+               "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", 
+               "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", "i8", 
+               "i8", "i8", "i8", "i8", "i8", "i8", "i8", "f8", "f8", "f8", 
+               "f8", "f8", "f8", "<U64", "<U64", "<U64", "<U64", "<U64", 
+               "<U64", "<U64", "<U64", "<U64", "i8", "i8", "<U64", "i8", "U3" 
+               ]
+
+    CSV_HEADER = [ "p1", "p36", "p37", "p2a", "weekday(p2a)", "p2b", "p6", "p7", 
+               "p8", "p9", "p10", "p11", "p12", "p13a", "p13b", "p13c", "p14",
+               "p15", "p16", "p17", "p18", "p19", "p20", "p21", "p22", "p23", 
+               "p24", "p27", "p28", "p34", "p35", "p39", "p44", "p45a", "p47",
+               "p48a", "p49", "p50a", "p50b", "p51", "p52", "p53", "p55a", 
+               "p57", "p58", "a", "b", "d", "e", "f", "g", "h", "i", "j", "k",
+               "l", "n", "o", "p", "q", "r", "s", "t", "p5a", "kraj" ]
 
     def __init__(self, url="https://ehw.fit.vutbr.cz/izv/", folder="data", 
                  cache_filename="data{}.pkl.gz"):
@@ -204,7 +212,7 @@ class DataDownloader():
 
                         for i, row in enumerate(csv_rows):
                             for j, col in enumerate(row):
-                                if DATA_TYPES[j].startswith(("i", "f", "d")):
+                                if self.DATA_TYPES[j].startswith(("i", "f", "d")):
                                     if col == "" or re.search("[a-zA-Z]", col):
                                         row[j] = "-1"
                                         continue
@@ -214,16 +222,16 @@ class DataDownloader():
 
                             row.append(region)
                             filtered_data.append(row)
-        except BadZipFile:
-            print("Nepodarilo se otevrit zip soubor")
+        except:
+            print("Chyba pri otevirani zip souboru")
             exit(1)
 
         data = np.array(filtered_data).T
         data = [*data]
         for i, d in enumerate(data):
-            data[i] = d.astype(DATA_TYPES[i])
+            data[i] = d.astype(self.DATA_TYPES[i])
 
-        return (CSV_HEADER, data)
+        return (self.CSV_HEADER, data)
 
     def get_list(self, regions=None):
         """
@@ -251,11 +259,11 @@ class DataDownloader():
             regions = self.REGION_CODES.keys()
         else:
             if not isinstance(regions, list):
-                raise InvalidRegion(regions.__class__.__name__, 
-                                    "regions must be list type, given")
+                print("Neplatně zadane regiony")
+                exit(1)
             if not all(item in self.REGION_CODES.keys() for item in regions):
-                raise InvalidRegion(regions, 
-                                    "regions contain invalid region code")
+                print("Neplatny kod kraje v seznamu")
+                exit(1)
         buff = None
         for region in regions:
             pickle_path = os.path.join(self.folder, self.cache_filename.format(region))
@@ -264,8 +272,8 @@ class DataDownloader():
                     with gzip.open(pickle_path, "rb") as pklf:
                         self.pickled_data = pickle.load(pklf)
                 else:
+                    data = self.parse_region_data(region)
                     with gzip.open(pickle_path, "wb") as gzipf:
-                        data = self.parse_region_data(region)
                         pickle.dump(data, gzipf)
                         self.pickled_data = data
     
@@ -276,7 +284,7 @@ class DataDownloader():
 
             self.pickled_data = None
 
-        return (CSV_HEADER, [*buff])
+        return (self.CSV_HEADER, [*buff])
 
     def find_zips(self, html):
         """
@@ -316,7 +324,7 @@ def process_args():
 if __name__ == "__main__":
     DEF_REGIONS = ["ZLK", "PHA", "JHM"]    
     args = process_args()
-    header, data = DataDownloader().get_list(DEF_REGIONS)
-    plot_stat((header, data), args.fig_location, args.show_figure)
+    data_source = DataDownloader().get_list()
+    plot_stat(data_source, args.fig_location, args.show_figure)
 
-    print(f"Number of columns: {len(header)}\n Regions: {', '.join(DEF_REGIONS)}\n Number of records: {len(data[0])}")
+    print(f"columns: {', '.join(data_source[0])}\nRegions: {', '.join(DEF_REGIONS)}\nNumber of records: {len(data_source[1][0])}")
